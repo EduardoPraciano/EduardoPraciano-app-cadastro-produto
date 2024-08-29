@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Produtos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .product-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc; /* Linha de separação */
+            padding-bottom: 10px;
+            flex-wrap: wrap; /* Permite que os itens se ajustem em várias linhas */
+        }
+        .product-name {
+            flex: 1;
+            min-width: 200px; /* Define uma largura mínima para os nomes dos produtos */
+        }
+        .product-item button {
+            margin-left: 10px;
+            margin-top: 10px; /* Adiciona espaço entre os botões em telas menores */
+        }
+        .summary {
+            margin-bottom: 20px;
+        }
+        .product-name.pdf-added {
+            color: green; /* Pinta de verde os produtos adicionados ao PDF */
+        }
+        @media (max-width: 768px) {
+            .product-item {
+                flex-direction: column; /* Alinha os itens em coluna em telas menores */
+                align-items: flex-start;
+            }
+            .product-item button {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Produtos</h1>
+        <div class="summary">
+            <p>Total de produtos cadastrados: {{ produtos|length }}</p>
+            <p>Total de produtos no PDF: {{ produtos_no_pdf|length }}</p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <form action="/add" method="post">
+            <input type="text" name="nome" placeholder="Nome do Produto" required>
+            <button type="submit">Adicionar Produto</button>
+            <button type="button" onclick="window.location.href='{{ url_for('open_pdf') }}'">Abrir PDF</button>
+            <button type="button" onclick="window.location.href='{{ url_for('delete_pdf') }}'">Excluir PDF</button>
+        </form>
+        <ul class="product-list">
+            {% for produto in produtos %}
+                <li class="product-item">
+                    <span class="product-name {% if produto.nome in produtos_no_pdf %}pdf-added{% endif %}">{{ produto.nome }}</span>
+                    <button type="button" onclick="window.location.href='{{ url_for('delete_produto', id=produto.id) }}'">Excluir</button>
+                    <button type="button" onclick="window.location.href='{{ url_for('add_to_pdf', id=produto.id) }}'">Adicionar ao PDF</button>
+                    <button type="button" onclick="window.location.href='{{ url_for('remove_from_pdf', id=produto.id) }}'">Retirar do PDF</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
